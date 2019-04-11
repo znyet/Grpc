@@ -1,0 +1,13 @@
+在服务端需要的代码
+
+ var options = new List<ChannelOption> {
+                new ChannelOption(ChannelOptions.MaxMessageLength,int.MaxValue)
+            };
+ Channel channel = new Channel("127.0.0.1:50051", ChannelCredentials.Insecure, options);
+在客户端需要的代码
+
+Server server = new Server(new List<ChannelOption> { new ChannelOption(ChannelOptions.MaxMessageLength, int.MaxValue) })
+{
+        Services = { Greeter.BindService(new GreeterImpl()) },
+        Ports = { new ServerPort("localhost", Port, ServerCredentials.Insecure) }
+ };
