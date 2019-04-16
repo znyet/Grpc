@@ -1,0 +1,127 @@
+https://www.kaifaxueyuan.com/basic/protobuf3/scalar-value-types.html
+
+Protobuf3 生成属于自己的类
+  若要生成Java、Python、C++、Go、Ruby、Objective-C或C代码，需要使用.proto文件中定义的消息类型，则需要在.proto上运行协议缓冲编译器protoc。如果尚未安装编译器，请下载该软件包并按照自述文件中的说明进行操作。对于Go，您还需要为编译器安装一个特殊的代码生成器插件：您可以在GitHub上的golang/protobuf 存储库中找到这个插件和安装说明。
+
+  协议编译器的调用如下：
+
+  IMPORT_PATH指定在解析导入指令时查找.proto文件的目录。如果省略则默认使用当前目录。多个导入目录可以通过多次传递proto_path选项来指定，它们将按顺序进行搜索。-I=IMPORT_PATH可以用作短形式的--proto_path。
+
+  您可以提供一个或多个输出指令：
+
+  --cpp_out 在DST_DIR生成C++代码. 参见C++生成代码参考。
+
+  --java_out 在DST_DIR生成java代码. 参见java生成代码参考。
+
+  --python_out 在DST_DIR生成python代码. 参见python生成代码参考。
+
+  --go_out 在DST_DIR生成go代码. 参见go生成代码参考。
+
+  --ruby_out 在DST_DIR生成ruby代码. Ruby生成代码参考手册正在编写中。
+
+  --objc_out 在DST_DIR生成Objective-C代码. 参见Objective-C生成代码参考。
+
+  --csharp_out 在DST_DIR生成C#代码. 参见C#生成代码参考。
+
+  --php_out 在DST_DIR生成php代码. 参见php生成代码参考。
+
+  作为额外的便利，如果DST_DIR以.zip或.jar结尾，编译器将把输出写入具有给定名称的单个ZIP格式的归档文件。JAVA JAR规范要求JAR输出也将得到清单文件。注意，如果输出归档文件已经存在，则它将被覆盖；编译器不够智能，无法将文件添加到现有归档文件中。
+
+  你必须提供一个或多个.proto文件作为输入，可以同时指定多个.proto文件。虽然文件是相对于当前目录命名的，但是每个文件必须驻留在其中一个IMPORT_PATH中，以便编译器可以确定其规范名称。
+  
+=========================================================================================
+
+Protobuf3 标量值类型
+  标量消息字段可以具有以下类型之一——该表显示了.proto文件中指定的类型，以及自动生成的类中的相应类型:
+
+.proto类型	说明	C++ 类型	Java 类型	Python类型	Go类型	Ruby类型	C#类型	PHP类型
+double	
+double 	double 	float 	float64 	Float 	double	float
+float	
+float 	float 	float 	float32 	Float 	float 	float
+int32 	使用可变长度编码。编码负数效率低下——如果你的字段可能有负值，请改用sint32。	int32 	int 	int 	int32 	Fixnum或Bignum（根据需要）	int 	integer
+int64	使用可变长度编码。编码负数效率低下——如果你的字段可能有负值，请改用sint64。	int64 	long 	int/long[3] 	int64 	Bignum 	long 	integer/string[5]
+uint32 	使用可变长度编码。	uint32 	int[1]	int/long[3] 	uint32 	Fixnum或Bignum (根据需要)	uint	integer
+uint64 	使用可变长度编码。	uint64 	long[1] 	 int/long[3]	uint64 	Bignum 	ulong 	integer/string[5]
+sint32 	使用可变长度编码。符号整型值。这些比常规int32s编码负数更有效。	int32 	int 	int 	int32 	Fixnum或Bignum (根据需要)	int 	integer
+sint64 	使用可变长度编码。符号整型值。这些比常规int64s编码负数更有效。	int64 	long 	int/long[3]	int64 	Bignum 	long 	integer/string[5]
+fixed32 	总是四字节。如果值通常大于228，则比uint 32更有效	uint32 	int[1] 	int/long[3] 	uint32	Fixnum或Bignum (根据需要)	uint 	integer
+fixed64 	总是八字节。如果值通常大于256，则比uint64更有效	uint64 	long[1]	int/long[3]	uint64 	Bignum 	ulong 	 integer/string[5]
+sfixed32 	总是四字节。	int32 	int 	int 	int32	Fixnum或Bignum (根据需要)	int 	integer
+sfixed64 	总是八字节。	int64 	long 	 int/long[3]	int64	Bignum 	long 	integer/string[5]
+bool 	
+bool 	boolean 	bool 	bool 	TrueClass/FalseClass	bool 	boolean
+string 	字符串必须始终包含UTF - 8编码或7位ASCII文本	string 	String 	str/unicode[4] 	string	String (UTF-8)	string 	string
+bytes 	可以包含任意字节序列	string 	ByteString 	str 	[]byte	String (ASCII-8BIT) 	ByteString 	string  
+  
+===========================================================================================
+
+Protobuf3 使用其他消息类型
+  您可以使用其他消息类型作为字段类型。例如，假设您希望在每个SearchResponse消息中包含Result消息，为此，您可以在.proto中定义结果消息类型，然后在SearchResponse中指定Result类型字段:
+
+message SearchResponse {
+  repeated Result results = 1;
+}
+
+message Result {
+  string url = 1;
+  string title = 2;
+  repeated string snippets = 3;
+}
+导入定义
+  在上面的例子中，Result 消息类型和SearchResponse定义在同一个文件中——如果你想用作字段类型的消息类型已经在另一个.proto 文件中定义了呢？
+
+  您可以通过导入其他.proto文件来使用文件中的定义的类型。 您可以在文件的顶部添加一条import语句:
+
+import "myproject/other_protos.proto";
+  默认情况下，您只能使用直接导入的 .proto文件定义。然而，有时你可能需要移动一个 .proto文件到一个新的位置，但不想为此更新了所有调用它的.proto文件，现在你可以在文件原始位置放置一个仿造的 .proto文件，使用import public将所有导入转发到新位置。任何包含import public语句的proto的人都可以临时依赖import public依赖。例如:
+
+// new.proto
+// All definitions are moved here
+// old.proto
+// This is the proto that all clients are importing.
+import public "new.proto";
+import "other.proto";
+// client.proto
+import "old.proto";
+// You use definitions from old.proto and new.proto, but not other.proto
+  协议编译器使用-I/--proto_path标志在协议编译器命令行指定的一组目录中搜索导入的文件。如果没有给出标志，它会在调用编译器的目录中查找。通常，您应该将--proto_path标志设置为项目的根目录，并对所有导入使用完全限定的名称。
+
+使用proto2消息类型
+  可以导入proto2消息类型并在proto3消息中使用它们，反之亦然。但是，proto2枚举不能直接在proto3语法中使用(如果导入的proto 2消息使用它们也没关系)。
+  
+  
+ ==========================================================================================
+ Protobuf3 Maps
+  如果要创建关联映射作为数据定义的一部分，协议缓冲区提供了一种方便快捷的语法:
+
+map<key_type, value_type> map_field = N;
+  其中key_type可以是任何整数或字符串类型(除浮点类型和字节以外的任何标量类型)。请注意，枚举不是有效的key_type,value_type可以是除另一个映射之外的任何类型。
+
+  因此，例如，如果您想为一个项目创建map，其中每个项目消息都与一个字符串键相关联，您可以这样定义它:
+
+map<string, Project> projects = 3;
+  映射字段不能重复。
+
+  map值线格式排序和map迭代排序未定义，因此您不能依赖于项目的map特定顺序。
+
+  为生成文本格式时。proto，地图按键排序。数字键按数字排序。
+
+  为.proto生成文本格式时，map按键排序。数字键按数字排序。
+
+  从线上解析或合并时，如果有重复的map键，则使用最后看到的键。从文本格式解析map时，如果存在重复的键，解析可能会失败。
+
+  如果为映射字段提供了键但没有值，则序列化该字段时的行为取决于语言。在c++、Java和Python中，该类型的默认值是序列化的，而在其他语言中，没有任何值是序列化的。
+
+  生成的map API目前可用于所有受支持的proto3语言。你可以在相关的API参考中找到更多关于你选择的语言的map API。
+
+向后兼容性
+  map语法相当于线上的以下内容，因此不支持map的协议缓冲区实现仍然可以处理数据:
+
+message MapFieldEntry {
+  key_type key = 1;
+  value_type value = 2;
+}
+
+repeated MapFieldEntry map_field = N;
+  任何支持映射的协议缓冲区实现都必须生成和接受可以被上述定义的数据。
